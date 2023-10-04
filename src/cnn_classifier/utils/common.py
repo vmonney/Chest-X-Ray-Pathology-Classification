@@ -1,7 +1,4 @@
 """Utility functions for the CNN classifier."""
-
-from __future__ import annotations
-
 import base64
 import json
 from pathlib import Path
@@ -45,17 +42,17 @@ def read_yaml(path_to_yaml: Path) -> ConfigBox:
 
 
 @ensure_annotations
-def create_directories(path_to_directories: list[str], verbose: bool = False) -> None:
+def create_directories(path_to_directories: list, verbose: bool = True) -> None:
     """Create list of directories.
 
     Args:
     ----
       path_to_directories (list): List of directories.
       verbose (bool, optional): If True, print message for
-      each directory created. Defaults to False.
+      each directory created. Defaults to True.
     """
     for path in path_to_directories:
-        path.mkdir(parents=True, exist_ok=True)
+        Path(path).mkdir(parents=True, exist_ok=True)
         if verbose:
             logger.info(f"Directory created: {path}")
 
@@ -94,7 +91,6 @@ def load_json(path: Path) -> ConfigBox:
     return ConfigBox(content)
 
 
-@ensure_annotations
 @ensure_annotations
 def save_bin(data: object, path: Path) -> None:
     """Save binary file.
