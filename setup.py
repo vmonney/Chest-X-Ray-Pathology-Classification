@@ -4,7 +4,7 @@ from pathlib import Path
 
 import setuptools
 
-with Path.open("README.md", "r", encoding="utf-8") as f:
+with Path("README.md").open("r", encoding="utf-8") as f:
     long_description = f.read()
 
 
@@ -12,7 +12,7 @@ __version__ = "0.0.0"
 
 REPO_NAME = "Chest-X-Ray-Pathology-Classification"
 AUTHOR_USER_NAME = "vmonney"
-SRC_REPO = "cnnClassifier"
+SRC_REPO = "cnn_classifier"
 AUTHOR_EMAIL = "monney.valentin@gmail.com"
 
 
@@ -23,7 +23,7 @@ setuptools.setup(
     author_email=AUTHOR_EMAIL,
     description="A small python package for CNN app",
     long_description=long_description,
-    long_description_content="text/markdown",
+    long_description_content_type="text/markdown",
     url=f"https://github.com/{AUTHOR_USER_NAME}/{REPO_NAME}",
     project_urls={
         "Bug Tracker": f"https://github.com/{AUTHOR_USER_NAME}/{REPO_NAME}/issues",
