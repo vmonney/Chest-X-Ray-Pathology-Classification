@@ -1,7 +1,9 @@
-"""Utility functions for the CNN classifier."""
+"""Utility functions for the Chest X-Ray Pathology Classification project."""
+
 import base64
 import json
 from pathlib import Path
+from typing import NoReturn
 
 import joblib
 import yaml
@@ -12,22 +14,26 @@ from ensure import ensure_annotations
 from cnn_classifier import logger
 
 
+class YamlReadError(Exception):
+    """Exception raised when there is an error reading a YAML file."""
+
+
 @ensure_annotations
 def read_yaml(path_to_yaml: Path) -> ConfigBox:
     """Read yaml file and returns.
 
     Args:
     ----
-      path_to_yaml (Path): path to yaml file
+      path_to_yaml (str): path like input
 
     Raises:
     ------
       ValueError: if yaml file is empty
-      Exception: if there is any other error while reading the file
+      YamlReadError: if there is an error reading the file
 
     Returns:
     -------
-      ConfigBox: yaml file as ConfigBox
+      ConfigBox: ConfigBox type
     """
     try:
         with path_to_yaml.open() as yaml_file:
@@ -37,39 +43,43 @@ def read_yaml(path_to_yaml: Path) -> ConfigBox:
     except BoxValueError:
         msg = "yaml file is empty"
         raise ValueError(msg) from None
-    except Exception as err:
-        raise err from None
+    except yaml.YAMLError as e:
+        msg = "Error reading YAML file"
+        raise YamlReadError(msg) from e
 
 
 @ensure_annotations
-def create_directories(path_to_directories: list, verbose: bool = True) -> None:
+def create_directories(  # noqa: ANN201
+    path_to_directories: list,
+    verbose: bool = True,
+):
     """Create list of directories.
 
     Args:
     ----
-      path_to_directories (list): List of directories.
-      verbose (bool, optional): If True, print message for
-      each directory created. Defaults to True.
+      path_to_directories (list): list of path of directories
+      verbose (bool, optional): ignore if multiple dirs is to
+      be created. Defaults to False.
     """
     for path in path_to_directories:
         Path(path).mkdir(parents=True, exist_ok=True)
         if verbose:
-            logger.info(f"Directory created: {path}")
+            logger.info(f"created directory at: {path}")
 
 
 @ensure_annotations
-def save_json(path: Path, data: dict) -> None:
-    """Save json file.
+def save_json(path: Path, data: dict) -> NoReturn:
+    """Save json data.
 
     Args:
     ----
-      path (Path): path to save json file
-      data (dict): data to save.
+      path (Path): path to json file
+      data (dict): data to be saved in json file
     """
-    with path.open("w") as fp:
-        json.dump(data, fp, indent=4)
+    with path.open("w") as f:
+        json.dump(data, f, indent=4)
 
-    logger.info(f"json file saved: {path}")
+    logger.info(f"json file saved at: {path}")
 
 
 @ensure_annotations
@@ -92,29 +102,28 @@ def load_json(path: Path) -> ConfigBox:
 
 
 @ensure_annotations
-def save_bin(data: object, path: Path) -> None:
+def save_bin(data: bytes, path: Path) -> NoReturn:
     """Save binary file.
 
     Args:
     ----
-      data (object): data to be saved as binary.
-      path (Path): path to binary file.
+      data (bytes): data to be saved as binary
+      path (Path): path to binary file
     """
     joblib.dump(value=data, filename=path)
-    logger.info(f"Binary file saved at: {path}")
+    logger.info(f"binary file saved at: {path}")
 
 
-@ensure_annotations
-def load_bin(path: Path) -> object:
+def load_bin(path: Path) -> bytes:
     """Load binary data.
 
     Args:
     ----
-      path (Path): path to binary file.
+      path (Path): path to binary file
 
     Returns:
     -------
-      object: object stored in the file.
+      bytes: object stored in the file
     """
     data = joblib.load(path)
     logger.info(f"binary file loaded from: {path}")
@@ -123,49 +132,48 @@ def load_bin(path: Path) -> object:
 
 @ensure_annotations
 def get_size(path: Path) -> str:
-    """Get size of file in human-readable format.
+    """Get size in KB.
 
     Args:
     ----
-      path (Path): path to file
+      path (Path): path of the file
 
     Returns:
     -------
-      str: size of file in human-readable format
+      str: size in KB
     """
-    size = path.stat().st_size
-    power = 2**10
-    n = 0
-    power_labels = {0: "", 1: "K", 2: "M", 3: "G", 4: "T"}
-    while size > power:
-        size /= power
-        n += 1
-    return f"{size:.2f} {power_labels[n]}B"
+    size_in_kb = round(path.stat().st_size / 1024)
+    return f"~ {size_in_kb} KB"
 
 
-def decode_image(imgstring: str, filename: str) -> None:
-    """Decode base64 image string and save to file.
+def decode_image(imgstring: str, file_name: Path) -> NoReturn:
+    """Decode image from base64 string and save to file.
 
     Args:
     ----
-      imgstring (str): base64 encoded image string.
-      filename (str): name of file to save decoded image to.
+      imgstring (str): base64 encoded image string
+      file_name (Path): path to save the decoded image
+
+    Returns:
+    -------
+      Any: None
     """
     imgdata = base64.b64decode(imgstring)
-    with Path(filename).open("wb") as f:
+    with file_name.open("wb") as f:
         f.write(imgdata)
+        f.close()
 
 
-def encode_image_into_base64(cropped_image_path: str) -> bytes:
-    """Encode an image into base64 format.
+def encode_image_into_base64(cropped_image_path: Path) -> bytes:
+    """Encode image into base64.
 
     Args:
     ----
-      cropped_image_path (str): The path to the image file.
+      cropped_image_path (pathlib.Path): path to the image file
 
     Returns:
     -------
-      bytes: The base64-encoded image data.
+      bytes: base64 encoded image
     """
-    with Path(cropped_image_path).open("rb") as f:
+    with cropped_image_path.open("rb") as f:
         return base64.b64encode(f.read())
