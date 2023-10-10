@@ -15,6 +15,8 @@ from cnn_classifier.pipeline.stage_02_prepare_base_model import (
     PrepareBaseModelTrainingPipeline,
 )
 
+from cnn_classifier.pipeline.stage_03_training import ModelTrainingPipeline
+
 STAGE_NAME = "Data Ingestion"
 
 try:
@@ -37,3 +39,15 @@ try:
 except Exception as e:
     logger.exception(e)
     raise
+
+
+STAGE_NAME = "Training"
+try: 
+   logger.info(f"*******************")
+   logger.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
+   model_trainer = ModelTrainingPipeline()
+   model_trainer.main()
+   logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
+except Exception as e:
+        logger.exception(e)
+        raise e
