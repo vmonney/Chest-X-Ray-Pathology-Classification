@@ -6,7 +6,6 @@ from tensorflow.keras import layers, Model
 
 from cnn_classifier.entity.config_entity import PrepareBaseModelConfig
 
-
 class PrepareBaseModel:
     """Prepare the base model for training."""
 
@@ -15,8 +14,8 @@ class PrepareBaseModel:
         self.config = config
 
     def get_base_model(self) -> None:
-        """Retrieve the base InceptionV3 model and save it."""
-        self.model = tf.keras.applications.inception_v3.InceptionV3(
+        """Retrieve the base MobileNetV2 model and save it."""
+        self.model = tf.keras.applications.MobileNetV2(
             input_shape=self.config.params_image_size,
             include_top=self.config.params_include_top,
             weights=self.config.params_weights,
@@ -45,14 +44,17 @@ class PrepareBaseModel:
         last_layer = model.get_layer(freeze_till)
         last_output = last_layer.output
 
-        x = layers.Flatten()(last_output)
-        x = layers.Dense(1024, activation='relu')(x)
-        x = layers.Dropout(0.2)(x)
+        # Additional architecture as per the provided description
+        x = layers.Conv2D(32, (3, 3), padding='same', activation='relu')(last_output)
+        x = layers.AveragePooling2D((2, 2))(x)
+        x = layers.Dropout(0.5)(x)  # Adjust dropout rate as per your requirement
+        x = layers.Flatten()(x)
+
         x = layers.Dense(classes, activation='sigmoid' if classes == 1 else 'softmax')(x)
 
         full_model = Model(model.input, x)
         full_model.compile(
-            optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
+            optimizer=tf.keras.optimizers.RMSprop(learning_rate=learning_rate),
             loss='binary_crossentropy' if classes == 1 else 'categorical_crossentropy',
             metrics=['accuracy'],
         )
@@ -66,7 +68,7 @@ class PrepareBaseModel:
             model=self.model,
             classes=self.config.params_classes,
             freeze_all=True,
-            freeze_till='mixed7',
+            freeze_till="Conv_1_bn",
             learning_rate=self.config.params_learning_rate,
         )
 
