@@ -32,17 +32,17 @@ stages:
       params.yaml:
         CLASSES: 2
         IMAGE_SIZE:
-        - 224
-        - 224
+        - 256
+        - 256
         - 3
         INCLUDE_TOP: false
-        LEARNING_RATE: 0.001
+        LEARNING_RATE: 0.0001
         WEIGHTS: imagenet
     outs:
     - path: artifacts/prepare_base_model
       hash: md5
-      md5: 61e4400b771ae2e96bf3189782164256.dir
-      size: 20493568
+      md5: 4d4d14a87a246728e6293fbc98573ed3.dir
+      size: 741194912
       nfiles: 2
   training:
     cmd: python src/cnn_classifier/pipeline/stage_03_training.py
@@ -54,8 +54,8 @@ stages:
       nfiles: 1127
     - path: artifacts/prepare_base_model
       hash: md5
-      md5: 61e4400b771ae2e96bf3189782164256.dir
-      size: 20493568
+      md5: 4d4d14a87a246728e6293fbc98573ed3.dir
+      size: 741194912
       nfiles: 2
     - path: config/config.yaml
       hash: md5
@@ -73,16 +73,16 @@ stages:
       params.yaml:
         AUGMENTATION: true
         BATCH_SIZE: 16
-        EPOCHS: 5
+        EPOCHS: 1
         IMAGE_SIZE:
-        - 224
-        - 224
+        - 256
+        - 256
         - 3
     outs:
     - path: artifacts/training/model.h5
       hash: md5
-      md5: 339d82cb3c82f10a5071c81a2173b0f8
-      size: 12472256
+      md5: 72ff5fce7a70785493515d4c9feffb37
+      size: 1886281240
   evalutation:
     cmd: python src/cnn_classifier/pipeline/stage_04_evaluation.py
     deps:
@@ -93,8 +93,8 @@ stages:
       nfiles: 1127
     - path: artifacts/training/model.h5
       hash: md5
-      md5: 339d82cb3c82f10a5071c81a2173b0f8
-      size: 12472256
+      md5: 72ff5fce7a70785493515d4c9feffb37
+      size: 1886281240
     - path: config/config.yaml
       hash: md5
       md5: 84e41c5f2618bcdb3493d3849f39f50a
@@ -107,11 +107,11 @@ stages:
       params.yaml:
         BATCH_SIZE: 16
         IMAGE_SIZE:
-        - 224
-        - 224
+        - 256
+        - 256
         - 3
     outs:
     - path: scores.json
       hash: md5
-      md5: 5ba4083a73303699602323bae63c851f
-      size: 70
+      md5: 3fb108c341bdb208cbdbefb30a35d752
+      size: 71
