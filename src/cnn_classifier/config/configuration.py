@@ -1,6 +1,6 @@
 """Configuration settings for the Chest X-Ray Pathology CNN Classifier."""
 from pathlib import Path
-
+import os
 from cnn_classifier.constants import CONFIG_FILE_PATH, PARAMS_FILE_PATH
 from cnn_classifier.entity.config_entity import (
     DataIngestionConfig,
