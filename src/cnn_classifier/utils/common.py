@@ -67,8 +67,8 @@ def create_directories(  # noqa: ANN201
             logger.info(f"created directory at: {path}")
 
 
-@ensure_annotations
-def save_json(path: Path, data: dict) -> NoReturn:
+# @ensure_annotations
+def save_json(path: Path, data: dict) -> None:
     """Save json data.
 
     Args:

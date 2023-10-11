@@ -1,9 +1,10 @@
 """Configuration settings for the Chest X-Ray Pathology CNN Classifier."""
 from pathlib import Path
-import os
+
 from cnn_classifier.constants import CONFIG_FILE_PATH, PARAMS_FILE_PATH
 from cnn_classifier.entity.config_entity import (
     DataIngestionConfig,
+    EvaluationConfig,
     PrepareBaseModelConfig,
     PrepareCallbacksConfig,
     TrainingConfig,
@@ -80,12 +81,12 @@ class ConfigurationManager:
         training = self.config.training
         prepare_base_model = self.config.prepare_base_model
         params = self.params
-        training_data = os.path.join(
-            self.config.data_ingestion.unzip_dir, "X-ray_chest_images"
+        training_data = (
+            Path(self.config.data_ingestion.unzip_dir) / "X-ray_chest_images"
         )
         create_directories([Path(training.root_dir)])
 
-        training_config = TrainingConfig(
+        return TrainingConfig(
             root_dir=Path(training.root_dir),
             trained_model_path=Path(training.trained_model_path),
             updated_base_model_path=Path(prepare_base_model.updated_base_model_path),
@@ -96,4 +97,12 @@ class ConfigurationManager:
             params_image_size=params.IMAGE_SIZE,
         )
 
-        return training_config
+    def get_validation_config(self) -> EvaluationConfig:
+        """Return the validation configuration."""
+        return EvaluationConfig(
+            path_of_model="artifacts/training/model.h5",
+            training_data="artifacts/data_ingestion/X-ray_chest_images",
+            all_params=self.params,
+            params_image_size=self.params.IMAGE_SIZE,
+            params_batch_size=self.params.BATCH_SIZE,
+        )

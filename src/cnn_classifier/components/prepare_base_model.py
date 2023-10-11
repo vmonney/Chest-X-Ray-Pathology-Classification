@@ -2,9 +2,10 @@
 from pathlib import Path
 
 import tensorflow as tf
-from tensorflow.keras import layers, Model
+from tensorflow.keras import Model, layers
 
 from cnn_classifier.entity.config_entity import PrepareBaseModelConfig
+
 
 class PrepareBaseModel:
     """Prepare the base model for training."""
@@ -31,7 +32,7 @@ class PrepareBaseModel:
         learning_rate: float,
         freeze_till: str,
     ) -> tf.keras.Model:
-        """Prepare the full model for training.""" 
+        """Prepare the full model for training."""
         if freeze_all:
             for layer in model.layers:
                 layer.trainable = False
@@ -40,26 +41,29 @@ class PrepareBaseModel:
                 layer.trainable = False
             for layer in model.get_layer(freeze_till).output:
                 layer.trainable = True
-                
+
         last_layer = model.get_layer(freeze_till)
         last_output = last_layer.output
 
         # Additional architecture as per the provided description
-        x = layers.Conv2D(32, (3, 3), padding='same', activation='relu')(last_output)
+        x = layers.Conv2D(32, (3, 3), padding="same", activation="relu")(last_output)
         x = layers.AveragePooling2D((2, 2))(x)
         x = layers.Dropout(0.5)(x)  # Adjust dropout rate as per your requirement
         x = layers.Flatten()(x)
 
-        x = layers.Dense(classes, activation='sigmoid' if classes == 1 else 'softmax')(x)
+        x = layers.Dense(classes, activation="sigmoid" if classes == 1 else "softmax")(
+            x,
+        )
 
         full_model = Model(model.input, x)
         full_model.compile(
             optimizer=tf.keras.optimizers.RMSprop(learning_rate=learning_rate),
-            loss='binary_crossentropy' if classes == 1 else 'categorical_crossentropy',
-            metrics=['accuracy'],
+            loss="binary_crossentropy" if classes == 1 else "categorical_crossentropy",
+            metrics=["accuracy"],
         )
 
         full_model.summary()
+
         return full_model
 
     def update_base_model(self) -> None:
